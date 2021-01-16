@@ -1,18 +1,32 @@
 import 'dart:ui';
 
 import 'package:flame/game.dart';
+import 'package:flame/gestures.dart';
+import 'package:flame/position.dart';
 import 'package:flame/sprite.dart';
+import 'package:flappy_bird/bird.dart';
 
-class FlappyBirdGame extends BaseGame {
+class FlappyBirdGame extends BaseGame with TapDetector {
+  Size screenSize;
+  Bird bird = Bird("bluebird-midflap.png");
   @override
   void render(Canvas canvas) {
-    // TODO: implement render
     super.render(canvas);
+    bird.renderCentered(canvas, bird.currentPosition);
   }
 
   @override
+  void onTap() {}
+
+  @override
   void update(double t) {
-    // TODO: implement update
     super.update(t);
+  }
+
+  @override
+  void resize(Size size) {
+    screenSize = size;
+    bird.currentPosition = Position(size.width / 2, size.height / 2);
+    super.resize(size);
   }
 }
