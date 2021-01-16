@@ -8,14 +8,14 @@ import 'package:flappy_bird/bird.dart';
 
 class FlappyBirdGame extends BaseGame with TapDetector {
   Size screenSize;
-  Bird bird = Bird("bluebird-midflap.png");
+  Bird bird = Bird();
 
   double time = 0;
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    bird.renderCentered(canvas, bird.currentPosition);
+    bird.animation.getSprite().renderCentered(canvas, bird.currentPosition);
   }
 
   @override
@@ -26,6 +26,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
   @override
   void update(double t) {
     super.update(t);
+    bird.animation.update(t);
     time += t;
     bird.calculateCurrentPosition(t);
   }
