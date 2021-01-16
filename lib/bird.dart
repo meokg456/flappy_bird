@@ -16,6 +16,10 @@ class Bird extends Sprite {
 
   void calculateCurrentPosition(double time) {
     speedY += Constant.gravityAcceleration * time;
-    currentPosition += Position(0, currentPosition.x * speedY);
+    currentPosition += Position(0, speedY * time);
+  }
+
+  void flap() {
+    speedY = -600;
   }
 }

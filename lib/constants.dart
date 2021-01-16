@@ -1,3 +1,3 @@
 class Constant {
-  static double gravityAcceleration = 0.1;
+  static double gravityAcceleration = 1000;
 }

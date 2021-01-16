@@ -19,7 +19,9 @@ class FlappyBirdGame extends BaseGame with TapDetector {
   }
 
   @override
-  void onTap() {}
+  void onTap() {
+    bird.flap();
+  }
 
   @override
   void update(double t) {
