@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  FlappyBirdGame game = FlappyBirdGame();
-  runApp(game.widget);
   Flame.util.fullScreen();
   Flame.util.setPortraitUpOnly();
+  FlappyBirdGame game = FlappyBirdGame();
+  runApp(game.widget);
 }

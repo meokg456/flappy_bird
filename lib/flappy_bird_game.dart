@@ -10,25 +10,34 @@ import 'package:flappy_bird/bird.dart';
 class FlappyBirdGame extends BaseGame with TapDetector {
   Size screenSize;
   Bird bird = Bird();
-  double time = 0;
+  bool gameOver = false;
+  Sprite gameOverSprite = Sprite("gameover.png");
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+    if (gameOver) {
+      gameOverSprite.renderCentered(
+          canvas, Position(screenSize.width / 2, screenSize.height / 2));
+    }
     bird.render(canvas);
   }
 
   @override
   void onTap() {
-    bird.flap();
+    if (!gameOver) {
+      bird.flap();
+    }
   }
 
   @override
   void update(double t) {
     super.update(t);
-    time += t;
-    bird.calculateCurrentPosition(t);
-    bird.animation.update(t);
+    if (!gameOver) {
+      bird.calculateCurrentPosition(t);
+      bird.animation.update(t);
+      gameOver = bird.isDead(size);
+    }
   }
 
   @override
