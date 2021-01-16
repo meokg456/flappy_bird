@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flame/components/component.dart';
 import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/position.dart';
@@ -9,13 +10,12 @@ import 'package:flappy_bird/bird.dart';
 class FlappyBirdGame extends BaseGame with TapDetector {
   Size screenSize;
   Bird bird = Bird();
-
   double time = 0;
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    bird.animation.getSprite().renderCentered(canvas, bird.currentPosition);
+    bird.render(canvas);
   }
 
   @override
@@ -26,9 +26,9 @@ class FlappyBirdGame extends BaseGame with TapDetector {
   @override
   void update(double t) {
     super.update(t);
-    bird.animation.update(t);
     time += t;
     bird.calculateCurrentPosition(t);
+    bird.animation.update(t);
   }
 
   @override
