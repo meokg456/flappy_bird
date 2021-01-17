@@ -29,7 +29,6 @@ class Bird {
   void prepareRender() {
     Sprite currentSprite = animation.getSprite();
     spriteComponent.sprite = currentSprite;
-    // spriteComponent.renderFlipX = !spriteComponent.renderFlipX;
     if (currentSprite.loaded()) {
       spriteComponent.width = currentSprite.src.width * 1.5;
       spriteComponent.height = currentSprite.src.height * 1.5;
@@ -47,7 +46,9 @@ class Bird {
 
   void render(Canvas canvas) {
     prepareRender();
+    canvas.save();
     spriteComponent.render(canvas);
+    canvas.restore();
   }
 
   void update(double time) {
@@ -63,16 +64,10 @@ class Bird {
       }
     }
     currentPosition += Position(0, speedY * time);
+    animation.update(time);
   }
 
   void flap() {
     speedY = -600;
-  }
-
-  bool isDead(Size screenSize) {
-    Sprite sprite = animation.getSprite();
-    if (!sprite.loaded()) return false;
-    return 7 * screenSize.height / 8 <= currentPosition.y + sprite.src.height ||
-        currentPosition.y < 0;
   }
 }
