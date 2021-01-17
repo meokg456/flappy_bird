@@ -7,5 +7,6 @@ void main() {
   Flame.util.fullScreen();
   Flame.util.setPortraitUpOnly();
   FlappyBirdGame game = FlappyBirdGame();
+  // game.runOnCreation = false;
   runApp(game.widget);
 }

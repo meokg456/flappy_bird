@@ -3,20 +3,40 @@ import 'dart:ui';
 import 'package:flame/components/component.dart';
 import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
+import 'package:flame/images.dart';
 import 'package:flame/position.dart';
 import 'package:flame/sprite.dart';
 import 'package:flappy_bird/bird.dart';
+import 'package:flappy_bird/scrolling_base.dart';
+
+enum GameStatus { guide, playing, gameOver }
 
 class FlappyBirdGame extends BaseGame with TapDetector {
   Size screenSize;
   Bird bird = Bird();
-  bool gameOver = false;
+  GameStatus gameStatus = GameStatus.guide;
   Sprite gameOverSprite = Sprite("gameover.png");
+  Sprite background = Sprite(
+      DateTime.now().hour >= 6 && DateTime.now().hour <= 18
+          ? "background-day.png"
+          : "background-night.png");
+  Sprite guide = Sprite("message.png");
+  ScrollingBase base;
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    if (gameOver) {
+    background.render(canvas,
+        height: screenSize.height, width: screenSize.width);
+    base.render(canvas);
+    if (gameStatus == GameStatus.guide) {
+      if (guide.loaded())
+        guide.renderCentered(
+            canvas,
+            Position(screenSize.width / 2,
+                screenSize.height / 2 - guide.src.height / 4));
+    }
+    if (gameStatus == GameStatus.gameOver) {
       gameOverSprite.renderCentered(
           canvas, Position(screenSize.width / 2, screenSize.height / 2));
     }
@@ -25,7 +45,11 @@ class FlappyBirdGame extends BaseGame with TapDetector {
 
   @override
   void onTap() {
-    if (!gameOver) {
+    if (gameStatus == GameStatus.guide) {
+      gameStatus = GameStatus.playing;
+      bird.idle = false;
+    }
+    if (gameStatus == GameStatus.playing) {
       bird.flap();
     }
   }
@@ -33,17 +57,21 @@ class FlappyBirdGame extends BaseGame with TapDetector {
   @override
   void update(double t) {
     super.update(t);
-    if (!gameOver) {
-      bird.calculateCurrentPosition(t);
+    if (gameStatus != GameStatus.gameOver) {
+      if (base != null) {
+        base.update(t);
+      }
+      bird.update(t);
       bird.animation.update(t);
-      gameOver = bird.isDead(size);
+      if (bird.isDead(size)) gameStatus = GameStatus.gameOver;
     }
   }
 
   @override
   void resize(Size size) {
     screenSize = size;
-    bird.currentPosition = Position(size.width / 2, size.height / 2);
+    base = ScrollingBase(size);
+    bird.currentPosition = Position(size.width / 4, size.height / 2);
     super.resize(size);
   }
 }

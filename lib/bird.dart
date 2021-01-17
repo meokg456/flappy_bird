@@ -22,12 +22,15 @@ class Bird {
 
   Position currentPosition = Position(20, 20);
   double speedY = 0;
+  double flyTime = 0;
+
+  bool idle = true;
 
   void prepareRender() {
     Sprite currentSprite = animation.getSprite();
-
     spriteComponent.sprite = currentSprite;
-    if (currentSprite.src != null) {
+    // spriteComponent.renderFlipX = !spriteComponent.renderFlipX;
+    if (currentSprite.loaded()) {
       spriteComponent.width = currentSprite.src.width * 1.5;
       spriteComponent.height = currentSprite.src.height * 1.5;
     }
@@ -38,7 +41,7 @@ class Bird {
         : rotateRadian < -math.pi / 4
             ? -math.pi / 4
             : rotateRadian;
-    spriteComponent.angle = rotateRadian;
+    if (!idle) spriteComponent.angle = rotateRadian;
     spriteComponent.setByPosition(currentPosition);
   }
 
@@ -47,8 +50,18 @@ class Bird {
     spriteComponent.render(canvas);
   }
 
-  void calculateCurrentPosition(double time) {
-    speedY += Constant.gravityAcceleration * time;
+  void update(double time) {
+    if (!idle) {
+      speedY += Constant.gravityAcceleration * time;
+    } else {
+      flyTime += time;
+      double flyInterval = 0.4;
+      if ((flyTime / flyInterval).round() % 2 == 0) {
+        speedY = 40;
+      } else {
+        speedY = -40;
+      }
+    }
     currentPosition += Position(0, speedY * time);
   }
 
@@ -57,8 +70,9 @@ class Bird {
   }
 
   bool isDead(Size screenSize) {
-    if (animation.getSprite().src == null) return false;
-    return screenSize.height <=
-        currentPosition.y + animation.getSprite().src.height;
+    Sprite sprite = animation.getSprite();
+    if (!sprite.loaded()) return false;
+    return 7 * screenSize.height / 8 <= currentPosition.y + sprite.src.height ||
+        currentPosition.y < 0;
   }
 }
