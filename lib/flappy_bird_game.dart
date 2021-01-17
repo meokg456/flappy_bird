@@ -6,6 +6,7 @@ import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/position.dart';
 import 'package:flame/sprite.dart';
+import 'package:flame/text_config.dart';
 import 'package:flappy_bird/bird.dart';
 import 'package:flappy_bird/constants.dart';
 import 'package:flappy_bird/couple_pipe.dart';
@@ -19,6 +20,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
   Bird bird = Bird();
   List<CouplePipe> pipes = [];
   double respawnTime = 0;
+  TextConfig config = TextConfig(fontSize: 48.0, fontFamily: 'biome');
   GameStatus gameStatus = GameStatus.guide;
   Sprite gameOverSprite = Sprite("gameover.png");
   Sprite background = Sprite(
@@ -27,6 +29,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
           : "background-night.png");
   Sprite guide = Sprite("message.png");
   ScrollingBase base;
+  Set<CouplePipe> earnedPipes = {};
 
   @override
   void render(Canvas canvas) {
@@ -47,6 +50,10 @@ class FlappyBirdGame extends BaseGame with TapDetector {
     for (var pipe in pipes) {
       pipe.render(canvas);
     }
+    if (gameStatus == GameStatus.playing) {
+      config.render(
+          canvas, "${earnedPipes.length}", Position(size.width / 2, 50));
+    }
     bird.render(canvas);
     if (gameStatus == GameStatus.gameOver) {
       gameOverSprite.renderCentered(
@@ -64,6 +71,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       bird.currentPosition = Position(size.width / 4, size.height / 2);
       pipes.removeWhere((element) => true);
       bird.idle = true;
+      earnedPipes.removeWhere((element) => true);
       gameStatus = GameStatus.guide;
     }
     if (gameStatus == GameStatus.playing) {
@@ -92,6 +100,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
     if (respawnTime > Constant.spawnInterval) {
       spawnPipe();
     }
+    if (gameStatus == GameStatus.guide) {}
     if (gameStatus == GameStatus.playing) {
       //update base
       if (base != null) {
@@ -100,18 +109,23 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       //update pipes
       for (var pipe in pipes) {
         pipe.update(t);
+        if (pipe.position.x < bird.currentPosition.x) {
+          earnedPipes.add(pipe);
+          print(earnedPipes.length);
+        }
       }
       //remove pipes out of screen
       pipes.removeWhere((element) => element.pipe.loaded()
           ? element.position.x < 0 - element.size.width
           : false);
-      //update bird
+      // check collision
       if (base != null) if (detectCollision()) {
         print("Collision");
         gameStatus = GameStatus.gameOver;
         bird.speedY = 0;
       }
     }
+    //update bird
     if (base != null) if (bird.currentPosition.y < base.cursor.y)
       bird.update(t);
   }
