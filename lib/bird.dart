@@ -40,7 +40,10 @@ class Bird {
         : rotateRadian < -math.pi / 4
             ? -math.pi / 4
             : rotateRadian;
-    if (!idle) spriteComponent.angle = rotateRadian;
+    if (!idle)
+      spriteComponent.angle = rotateRadian;
+    else
+      spriteComponent.angle = 0;
     spriteComponent.setByPosition(currentPosition);
   }
 
@@ -68,6 +71,6 @@ class Bird {
   }
 
   void flap() {
-    speedY = -600;
+    speedY = -Constant.flapStrength;
   }
 }

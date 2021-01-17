@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/components/component.dart';
@@ -9,6 +10,7 @@ import 'package:flappy_bird/bird.dart';
 import 'package:flappy_bird/constants.dart';
 import 'package:flappy_bird/couple_pipe.dart';
 import 'package:flappy_bird/scrolling_base.dart';
+import 'package:flutter/cupertino.dart';
 
 enum GameStatus { guide, playing, gameOver }
 
@@ -58,8 +60,27 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       gameStatus = GameStatus.playing;
       bird.idle = false;
     }
+    if (gameStatus == GameStatus.gameOver) {
+      bird.currentPosition = Position(size.width / 4, size.height / 2);
+      pipes.removeWhere((element) => true);
+      bird.idle = true;
+      gameStatus = GameStatus.guide;
+    }
     if (gameStatus == GameStatus.playing) {
       bird.flap();
+    }
+  }
+
+  void spawnPipe() {
+    if (gameStatus == GameStatus.playing) {
+      respawnTime = 0;
+      double holeHeight = screenSize.height / 4;
+      double bottomHeight = Random().nextDouble() * (base.cursor.y * 1 / 3) +
+          base.cursor.y * 1 / 4;
+      Position bottomPipePosition =
+          Position(screenSize.width, base.cursor.y - bottomHeight);
+      pipes.add(CouplePipe(bottomPipePosition,
+          Size(screenSize.width / 4.5, bottomHeight), holeHeight));
     }
   }
 
@@ -69,10 +90,9 @@ class FlappyBirdGame extends BaseGame with TapDetector {
     //respawn pipes
     respawnTime += t;
     if (respawnTime > Constant.spawnInterval) {
-      respawnTime = 0;
-      pipes.add(CouplePipe(Position(screenSize.width, base.cursor.y)));
+      spawnPipe();
     }
-    if (gameStatus != GameStatus.gameOver) {
+    if (gameStatus == GameStatus.playing) {
       //update base
       if (base != null) {
         base.update(t);
@@ -83,11 +103,13 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       }
       //remove pipes out of screen
       pipes.removeWhere((element) => element.pipe.loaded()
-          ? element.position.x < 0 - element.pipe.src.width
+          ? element.position.x < 0 - element.size.width
           : false);
       //update bird
       if (base != null) if (detectCollision()) {
+        print("Collision");
         gameStatus = GameStatus.gameOver;
+        bird.speedY = 0;
       }
     }
     if (base != null) if (bird.currentPosition.y < base.cursor.y)
@@ -107,13 +129,17 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       return true;
     }
     for (var pipe in pipes) {
-      Rect pipeBox = Rect.fromLTWH(
-          pipe.spriteComponent.x,
-          pipe.spriteComponent.y,
-          pipe.spriteComponent.width,
-          pipe.spriteComponent.height);
-      if (birdBox.overlaps(pipeBox)) {
-        gameStatus = GameStatus.gameOver;
+      Rect pipeBoxOnBottom = Rect.fromLTWH(
+          pipe.spriteComponentOnBottom.x,
+          pipe.spriteComponentOnBottom.y,
+          pipe.spriteComponentOnBottom.width,
+          pipe.spriteComponentOnBottom.height);
+      Rect pipeBoxOnTop = Rect.fromLTWH(
+          pipe.spriteComponentOnTop.x,
+          pipe.spriteComponentOnTop.y,
+          pipe.spriteComponentOnTop.width,
+          pipe.spriteComponentOnTop.height);
+      if (birdBox.overlaps(pipeBoxOnTop) || birdBox.overlaps(pipeBoxOnBottom)) {
         return true;
       }
     }

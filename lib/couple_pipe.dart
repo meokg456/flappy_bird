@@ -8,19 +8,33 @@ import 'package:flutter/cupertino.dart';
 class CouplePipe {
   Sprite pipe = Sprite("pipe-green.png");
   Position position;
-  SpriteComponent spriteComponent = SpriteComponent();
-  CouplePipe(this.position);
+  Size size;
+  double holeHeight;
+  SpriteComponent spriteComponentOnBottom = SpriteComponent();
+  SpriteComponent spriteComponentOnTop = SpriteComponent();
+  CouplePipe(this.position, this.size, this.holeHeight);
 
   void render(Canvas canvas) {
     if (pipe.loaded()) {
       canvas.save();
-      spriteComponent.sprite = pipe;
-      spriteComponent.height = pipe.src.height;
-      spriteComponent.width = pipe.src.width;
-      spriteComponent.y = position.y - pipe.src.height;
-      spriteComponent.x = position.x;
-      spriteComponent.anchor = Anchor.topLeft;
-      spriteComponent.render(canvas);
+      spriteComponentOnBottom.sprite = pipe;
+      spriteComponentOnBottom.height = size.height;
+      spriteComponentOnBottom.width = size.width;
+      spriteComponentOnBottom.y = position.y;
+      spriteComponentOnBottom.x = position.x;
+      spriteComponentOnBottom.renderFlipY = false;
+      spriteComponentOnBottom.anchor = Anchor.topLeft;
+      spriteComponentOnBottom.render(canvas);
+      canvas.restore();
+      canvas.save();
+      spriteComponentOnTop.sprite = pipe;
+      spriteComponentOnTop.height = position.y - holeHeight;
+      spriteComponentOnTop.width = size.width;
+      spriteComponentOnTop.y = 0;
+      spriteComponentOnTop.x = position.x;
+      spriteComponentOnTop.anchor = Anchor.topLeft;
+      spriteComponentOnTop.renderFlipY = true;
+      spriteComponentOnTop.render(canvas);
       canvas.restore();
     }
   }
