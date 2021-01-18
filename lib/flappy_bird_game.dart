@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/components/component.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/position.dart';
@@ -75,6 +76,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       gameStatus = GameStatus.guide;
     }
     if (gameStatus == GameStatus.playing) {
+      Flame.audio.play("wing.wav");
       bird.flap();
     }
   }
@@ -110,8 +112,9 @@ class FlappyBirdGame extends BaseGame with TapDetector {
       for (var pipe in pipes) {
         pipe.update(t);
         if (pipe.position.x < bird.currentPosition.x) {
-          earnedPipes.add(pipe);
-          print(earnedPipes.length);
+          if (earnedPipes.add(pipe)) {
+            Flame.audio.play("point.wav");
+          }
         }
       }
       //remove pipes out of screen
@@ -120,7 +123,7 @@ class FlappyBirdGame extends BaseGame with TapDetector {
           : false);
       // check collision
       if (base != null) if (detectCollision()) {
-        print("Collision");
+        Flame.audio.play("hit.wav");
         gameStatus = GameStatus.gameOver;
         bird.speedY = 0;
       }
